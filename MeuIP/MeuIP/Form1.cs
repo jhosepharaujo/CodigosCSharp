@@ -13,21 +13,28 @@ namespace MeuIP
 {
     public partial class Form1 : Form
     {
-        public Form1()
+        private string _IP = "sem IP ";
+        private string _hostName = "Nome Computador:";
+        public Form1(string[] args = null)
         {
             InitializeComponent();
         }
 
+        private void AtualizarIpEHostNome()
+        {
+            HostName.Text = _hostName = "Nome Computador: " + Environment.MachineName;
+            meuIP.Text = _IP = "Meu IP: " + Dns.GetHostAddresses(Environment.MachineName).FirstOrDefault(x => x.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork).ToString();
+            notifyIcon1.Text = string.Format("{0}", _IP);
+        }
+
         private void Form1_Load(object sender, EventArgs e)
         {
-            HostName.Text = "Nome Computador: " + Environment.MachineName;
-
-            meuIP.Text = "Meu IP: " + Dns.GetHostAddresses(Environment.MachineName).FirstOrDefault(x => !x.IsIPv6SiteLocal && !x.IsIPv6LinkLocal && !x.IsIPv6Multicast && !x.IsIPv6Teredo);
+            AtualizarIpEHostNome();
 
             // muda a posição do formulário para o canto inferior direito
             this.Location = new System.Drawing.Point(System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width - this.Width, System.Windows.Forms.Screen.PrimaryScreen.Bounds.Bottom - this.Height - 50);
-
             this.WindowState = FormWindowState.Minimized;
+            this.Hide();
         }
 
         private void fecharToolStripMenuItem_Click(object sender, EventArgs e)
@@ -37,19 +44,11 @@ namespace MeuIP
 
         private void notifyIcon1_MouseDoubleClick(object sender, MouseEventArgs e)
         {
-            notifyIcon1.Visible = false;
-            Show();
-            WindowState = FormWindowState.Normal;
-        }
-
-        private void Form1_Resize(object sender, EventArgs e)
-        {
-            if (FormWindowState.Minimized == this.WindowState)
-            {
-                notifyIcon1.Visible = true;
-                //notifyIcon1.ShowBalloonTip(500, "Meu IP", "", ToolTipIcon.Info);
-                this.Hide();
-            }
+            AtualizarIpEHostNome();
+            notifyIcon1.Visible = true;
+            this.WindowState = FormWindowState.Normal;
+            this.TopMost = true; // deixa o form sempre visível
+            this.Show();
         }
 
         private void minimizarToolStripMenuItem_Click(object sender, EventArgs e)
@@ -59,7 +58,14 @@ namespace MeuIP
 
         private void Form1_DoubleClick(object sender, EventArgs e)
         {
-            this.WindowState = FormWindowState.Minimized;
+            this.Hide();
         }
+
+        private void notifyIcon1_BalloonTipShown(object sender, EventArgs e)
+        {
+            AtualizarIpEHostNome();
+            notifyIcon1.Text = string.Format("{0}", _IP);
+        }
+
     }
 }
