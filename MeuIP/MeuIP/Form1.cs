@@ -15,6 +15,7 @@ namespace MeuIP
     {
         private string _IP = "sem IP ";
         private string _hostName = "Nome Computador:";
+        private bool flag = true;
         public Form1(string[] args = null)
         {
             InitializeComponent();
@@ -24,7 +25,7 @@ namespace MeuIP
         {
             HostName.Text = _hostName = "Nome Computador: " + Environment.MachineName;
             meuIP.Text = _IP = "Meu IP: " + Dns.GetHostAddresses(Environment.MachineName).FirstOrDefault(x => x.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork).ToString();
-            notifyIcon1.Text = string.Format("{0}", _IP);
+            notifyIcon.Text = string.Format("{0}", _IP);
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -44,11 +45,7 @@ namespace MeuIP
 
         private void notifyIcon1_MouseDoubleClick(object sender, MouseEventArgs e)
         {
-            AtualizarIpEHostNome();
-            notifyIcon1.Visible = true;
-            this.WindowState = FormWindowState.Normal;
-            this.TopMost = true; // deixa o form sempre visível
-            this.Show();
+            SetStatusVisible();
         }
 
         private void minimizarToolStripMenuItem_Click(object sender, EventArgs e)
@@ -64,8 +61,33 @@ namespace MeuIP
         private void notifyIcon1_BalloonTipShown(object sender, EventArgs e)
         {
             AtualizarIpEHostNome();
-            notifyIcon1.Text = string.Format("{0}", _IP);
+            notifyIcon.Text = string.Format("{0}", _IP);
         }
 
+        private void notifyIcon_MouseClick(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                if (flag)
+                {
+                    SetStatusVisible();
+                    flag = false;
+                }
+                else
+                {
+                    this.Hide();
+                    flag = true;
+                }
+            }
+        }
+
+        private void SetStatusVisible()
+        {
+            AtualizarIpEHostNome();
+            notifyIcon.Visible = true;
+            this.WindowState = FormWindowState.Normal;
+            this.TopMost = true; // deixa o form sempre visível
+            this.Show();
+        }
     }
 }
